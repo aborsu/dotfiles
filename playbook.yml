@@ -1,0 +1,34 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Change dconf settings
+      dconf:
+        key: /org/gnome/desktop/peripherals/touchpad/tap-to-click
+        value: "true"
+        state: present
+#    - name: Intall sublime
+#      become: yes
+#      block:
+#        - name: Installing GPG key for Sublime Text
+#          command: rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
+#
+#        - name: Select Channel to Install Sublime Text
+#          command: dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo
+#
+#        - name: Installing Sublime Text
+#          dnf:
+#            name: sublime-text
+#            state: latest
+#
+#    - name: Install nextcloud
+#      become: yes
+#      dnf:
+#        name: nextcloud-client-nautilus
+#        state: latest
+    - name: My apps
+      dnf:
+        name: keepassxc
+        state: present
+
+    - name: Work stuff
+      import_tasks: tasks/work.yml

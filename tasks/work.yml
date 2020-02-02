@@ -1,0 +1,37 @@
+---
+- name: Setup openconnect for work vpn
+  become: yes
+  dnf:
+    name:
+      - NetworkManager-openconnect
+    state: latest
+
+- name: Setup citrix for work
+  become: yes
+  block:
+    - name: Install required libraries
+      dnf:
+        name:
+          - compat-openssl10
+        state: latest
+    - name: Intall citrix client
+      become: yes
+      dnf:
+        name: ICAClient-rhel-19.12.0.19-0.x86_64.rpm
+        state: installed
+
+    - name: Add work root certificate to Citrix's trust store
+      copy:
+        src: work_certificate.pem
+        dest: /opt/Citrix/ICAClient/keystore/cacerts/work_certificate.pem
+      register: certificate
+
+    - name: Rebuild cacert of Citrix
+      when: certificate.changed
+      command: /opt/Citrix/ICAClient/util/ctx_rehash
+
+    - name: Set LD_LOAD in Citrix desktop file
+      lineinfile:
+        line: "Exec=env LD_PRELOAD=\"/lib64/libcrypto.so.1.0.2o\" /opt/Citrix/ICAClient/wfica -icaroot /opt/Citrix/ICAClient %f"
+        regexp: "^Exec="
+        path: /usr/share/applications/wfica.desktop
